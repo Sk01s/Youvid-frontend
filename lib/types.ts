@@ -53,10 +53,10 @@ export interface CommentInteraction {
 export interface Comment extends CommentInteraction {
   id: string;
   videoId: string;
-  author: string;
-  authorAvatar: string;
+  username: string;
+  avatarUrl: string;
   text: string;
-  date: string;
+  createdAt: string;
   likes: number;
   dislikes: number;
 }
