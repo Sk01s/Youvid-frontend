@@ -173,14 +173,6 @@ export const searchVideos = async (query: string): Promise<Video[]> => {
   );
 };
 
-export const subscribeToChannel = async (channelId: number): Promise<Video> => {
-  await delay(200);
-  const video = mockVideos.find((v) => v.channelId === channelId);
-  if (!video) throw new Error("Channel not found");
-  video.isSubscribed = !video.isSubscribed;
-  return { ...video };
-};
-
 // Comment API functions
 
 export const fetchComments = async (videoId: string): Promise<Comment[]> => {

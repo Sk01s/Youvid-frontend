@@ -19,7 +19,6 @@ interface VideoPlayerProps {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, thumbnailUrl }) => {
   const [playing, setPlaying] = useState(false);
 
-  console.log(hlsUrl, thumbnailUrl);
   return (
     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
       <ReactPlayer

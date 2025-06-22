@@ -11,12 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { Comment as CommentType } from "@/lib/types";
 import Comment from "./comment";
-import {
-  fetchComments,
-  addComment,
-  likeComment,
-  dislikeComment,
-} from "@/lib/api";
+import { createComment, getVideoComments } from "@/lib/api/comments.api";
 
 // Main CommentsSection component
 export default function CommentsSection({ videoId }: { videoId: string }) {
@@ -28,14 +23,14 @@ export default function CommentsSection({ videoId }: { videoId: string }) {
   // Fetch comments with React Query
   const { data: comments = [], isLoading } = useQuery<CommentType[]>({
     queryKey: ["comments", videoId],
-    queryFn: () => fetchComments(videoId),
+    queryFn: () => getVideoComments(videoId),
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: Boolean(videoId),
   });
 
   // Add comment mutation
   const addCommentMutation = useMutation({
-    mutationFn: (text: string) => addComment(videoId, text),
+    mutationFn: (text: string) => createComment(videoId, text),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
       setNewComment("");

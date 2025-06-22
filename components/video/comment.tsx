@@ -11,11 +11,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Comment } from "@/lib/types";
 import {
-  fetchComments,
-  addComment,
-  likeComment,
-  dislikeComment,
-} from "@/lib/api";
+  toggleCommentDislike,
+  toggleCommentLike,
+} from "@/lib/api/comments.api";
 
 // New CommentItem component
 const CommentItem = ({
@@ -33,7 +31,7 @@ const CommentItem = ({
 
   // Like comment mutation
   const likeMutation = useMutation({
-    mutationFn: () => likeComment(comment.id),
+    mutationFn: () => toggleCommentLike(comment.id),
     onMutate: () => setIsLiking(true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
@@ -43,7 +41,7 @@ const CommentItem = ({
 
   // Dislike comment mutation
   const dislikeMutation = useMutation({
-    mutationFn: () => dislikeComment(comment.id),
+    mutationFn: () => toggleCommentDislike(comment.id),
     onMutate: () => setIsDisliking(true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
@@ -54,10 +52,10 @@ const CommentItem = ({
   return (
     <div className="flex space-x-4">
       <Avatar>
-        {comment.authorAvatar ? (
-          <AvatarImage src={comment.authorAvatar} alt={comment.author} />
+        {comment.avatarUrl ? (
+          <AvatarImage src={comment.avatarUrl} alt={comment.username} />
         ) : (
-          <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+          <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
         )}
       </Avatar>
       <div className="flex-1">
@@ -68,7 +66,7 @@ const CommentItem = ({
               theme === "dark" ? "text-zinc-100" : "text-zinc-800"
             )}
           >
-            {comment.author}
+            {comment.username}
           </span>
           <span
             className={cn(
@@ -76,7 +74,7 @@ const CommentItem = ({
               theme === "dark" ? "text-zinc-400" : "text-zinc-500"
             )}
           >
-            {comment.date}
+            {comment.createdAt}
           </span>
         </div>
         <p
