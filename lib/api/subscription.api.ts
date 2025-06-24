@@ -58,7 +58,6 @@ export const getSubscriptionStatus = async (
           err.error || err.message || "Failed to get subscription status",
       };
     }
-
     return await res.json();
   } catch (error) {
     throw {

@@ -28,7 +28,7 @@ export default function VideoGrid({ videos, isLoading }: VideoGridProps) {
   const gridClasses = `
     grid
     gap-6
-    grid-cols-[repeat(auto-fit,_minmax(16rem,_1fr))]
+    grid-cols-[repeat(auto-fit,_minmax(16rem,auto))]
   `;
 
   const renderSkeletons = () =>
@@ -50,7 +50,13 @@ export default function VideoGrid({ videos, isLoading }: VideoGridProps) {
           <p className="text-lg">No videos found</p>
         </div>
       ) : (
-        <div className={gridClasses.trim()}>{renderCards()}</div>
+        <div
+          className={`${gridClasses.trim()} ${
+            videos!.length === 1 && "md:max-w-[40%]"
+          }`}
+        >
+          {renderCards()}
+        </div>
       )}
     </div>
   );

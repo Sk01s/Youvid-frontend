@@ -23,6 +23,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       message: errorData?.message || response.statusText,
     };
   }
+
   return response.json();
 }
 
@@ -137,9 +138,11 @@ export async function getUserVideos(page = 1, limit = 20): Promise<Video[]> {
     url.searchParams.append("limit", String(limit));
 
     const response = await authFetch(url.toString());
-    const res = await handleResponse<ApiResponse<Video[]>>(response);
-    return res.data;
+    const res = await handleResponse<Video[]>(response);
+    const data = res.map((video) => mapToFrontend(video));
+    return data;
   } catch (error) {
+    console.log(error);
     throw handleApiError(error);
   }
 }
@@ -162,6 +165,63 @@ export async function updateVideoInteraction(
     );
 
     return handleResponse<VideoInteraction>(response);
+  } catch (error) {
+    throw handleApiError(error);
+  }
+}
+
+export async function getUserViewedVideos(
+  page = 1,
+  limit = 20
+): Promise<Video[]> {
+  try {
+    const url = new URL(`${API_URL}/videos/user/viewed`);
+    url.searchParams.append("page", String(page));
+    url.searchParams.append("limit", String(limit));
+
+    const response = await authFetch(url.toString());
+    const res = await handleResponse<ApiResponse<Video[]>>(response);
+
+    const data = res.data.map((video) => mapToFrontend(video));
+    return data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+}
+
+/**
+ * Get user's liked videos with pagination
+ */
+export async function getLikedVideos(page = 1, limit = 20): Promise<Video[]> {
+  try {
+    const url = new URL(`${API_URL}/videos/user/liked`);
+    url.searchParams.append("page", String(page));
+    url.searchParams.append("limit", String(limit));
+
+    const response = await authFetch(url.toString());
+    const res = await handleResponse<ApiResponse<Video[]>>(response);
+
+    const data = res.data.map((video) => mapToFrontend(video));
+    return data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+}
+
+/**
+ * Get user's saved videos with pagination
+ */
+export async function getSavedVideos(page = 1, limit = 20): Promise<Video[]> {
+  try {
+    const url = new URL(`${API_URL}/videos/user/saved`);
+    url.searchParams.append("page", String(page));
+    url.searchParams.append("limit", String(limit));
+
+    const response = await authFetch(url.toString());
+    const res = await handleResponse<ApiResponse<Video[]>>(response);
+
+    const data = res.data.map((video) => mapToFrontend(video));
+    return data;
   } catch (error) {
     throw handleApiError(error);
   }

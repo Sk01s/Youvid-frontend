@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getRecommendedVideos } from "@/lib/api/videos/videos.api";
+import {
+  getRecommendedVideos,
+  getUserVideos,
+} from "@/lib/api/videos/videos.api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import VideoCard from "@/components/dashboard/video-card";
 import { Video } from "@/lib/types";
 import { LoadingPage } from "@/components/ui/loading-page";
 import { useSelector, useDispatch } from "react-redux";
@@ -13,6 +15,7 @@ import { logout } from "@/lib/features/auth-slice";
 import { selectCurrentUser } from "@/lib/features/auth-slice";
 import { createChannel, getChannelsByUserId } from "@/lib/api/channel.api";
 import Modal from "@/components/ui/modal";
+import VideoCard from "@/components/home/video-card";
 
 const DashboardPage = () => {
   const theme = useSelector((state: RootState) => state.theme.mode);
@@ -31,7 +34,7 @@ const DashboardPage = () => {
     isError: videosError,
   } = useQuery<Video[]>({
     queryKey: ["my-videos"],
-    queryFn: () => getRecommendedVideos(),
+    queryFn: () => getUserVideos(),
   });
 
   const {
@@ -42,7 +45,7 @@ const DashboardPage = () => {
     queryKey: ["user-channels", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      return getChannelsByUserId(parseInt(user.id));
+      return getChannelsByUserId(user.id);
     },
     enabled: !!user?.id,
   });

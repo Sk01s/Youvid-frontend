@@ -2,9 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { useQuery } from "@tanstack/react-query";
 import type { RootState } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Home, Video, Clock, Bookmark, ThumbsUp, X } from "lucide-react";
+import { Channel } from "@/lib/types";
+import { getChannelsByUserId } from "@/lib/api/channel.api";
 
 interface SidebarItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -14,6 +17,7 @@ interface SidebarItem {
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const theme = useSelector((state: RootState) => state.theme.mode);
+  const userId = useSelector((state: RootState) => state.auth.user?.id);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -21,10 +25,20 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { icon: Home, label: "Home", path: "/" },
     { icon: Video, label: "Subscriptions", path: "/subscriptions" },
     { icon: Clock, label: "History", path: "/history" },
-    { icon: Bookmark, label: "Watch later", path: "/later" },
+    { icon: Bookmark, label: "Watch later", path: "/saved" },
     { icon: ThumbsUp, label: "Liked videos", path: "/likes" },
   ];
 
+  const {
+    data: channels,
+    isLoading,
+    isError,
+  } = useQuery<Channel[], Error>({
+    queryKey: ["channels", userId],
+    queryFn: () => getChannelsByUserId(userId!),
+    enabled: Boolean(userId),
+    staleTime: 1000 * 60 * 5,
+  });
   return (
     <aside
       className={`w-60 transition-colors duration-300 md:max-h-[calc(100vh-4.3rem)] h-full overflow-y-scroll ${
@@ -34,7 +48,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       }`}
     >
       <div className="p-4 relative">
-        {/* Mobile Close Button */}
         {onClose && (
           <Button
             size="icon"
@@ -45,7 +58,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           </Button>
         )}
 
-        {/* Main Navigation Items */}
         {mainItems.map((item) => {
           const isActive = pathname === item.path;
           return (
@@ -69,14 +81,12 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           );
         })}
 
-        {/* Divider */}
         <hr
           className={`my-4 ${
             theme === "dark" ? "border-gray-700" : "border-gray-300"
           }`}
         />
 
-        {/* Subscriptions Section */}
         <div
           className={`text-sm font-semibold mb-2 ${
             theme === "dark" ? "text-gray-400" : "text-gray-500"
@@ -84,26 +94,39 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         >
           Subscriptions
         </div>
+
+        {isLoading && <p className="text-sm text-gray-500">Loading...</p>}
+        {isError && (
+          <p className="text-sm text-red-500">Failed to load subscriptions.</p>
+        )}
+
         <div className="space-y-2">
-          {["Channel 1", "Channel 2", "Channel 3"].map((channel, index) => (
-            <div
-              key={index}
-              className={`flex items-center p-2 rounded-md ${
-                theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100"
+          {channels?.map((ch) => (
+            <Button
+              key={ch.id}
+              variant="ghost"
+              onClick={() => {
+                router.push(`/channel/${ch.id}`);
+                onClose?.();
+              }}
+              className={`w-full justify-start p-2 rounded-md ${
+                theme === "dark"
+                  ? "text-gray-300 hover:text-white hover:bg-zinc-800"
+                  : "text-gray-900 hover:text-gray-700 hover:bg-zinc-100"
               }`}
             >
-              <div
-                className={`w-6 h-6 rounded-full mr-3 ${
-                  theme === "dark" ? "bg-zinc-700" : "bg-zinc-300"
-                }`}
+              <img
+                src={ch.avatar}
+                alt={ch.name}
+                className="w-6 h-6 rounded-full mr-3 object-cover"
               />
-              <span
-                className={theme === "dark" ? "text-gray-300" : "text-gray-900"}
-              >
-                {channel}
-              </span>
-            </div>
+              <span>{ch.name}</span>
+            </Button>
           ))}
+
+          {!isLoading && channels?.length === 0 && (
+            <p className="text-sm text-gray-500">No subscriptions yet.</p>
+          )}
         </div>
       </div>
     </aside>

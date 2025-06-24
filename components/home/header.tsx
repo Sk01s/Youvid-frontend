@@ -145,7 +145,7 @@ export default function Header({
           </div>
 
           {/* Right Section: Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1">
             {/* Mobile Search Button */}
             <Button
               variant="ghost"
@@ -193,8 +193,8 @@ export default function Header({
 
             {/* User Profile */}
             <Link
-              href={"/auth"}
-              className={`rounded-full ${
+              href={"/profile"}
+              className={`rounded-full p-[0.64rem] ${
                 theme === "dark"
                   ? "text-gray-300 hover:text-white hover:bg-zinc-800"
                   : "text-gray-600 hover:text-gray-900 hover:bg-zinc-100"

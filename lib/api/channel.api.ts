@@ -41,7 +41,7 @@ export async function getChannelById(id: number): Promise<Channel> {
 /**
  * GET /api/channels/user/:userId
  */
-export async function getChannelsByUserId(userId: number): Promise<Channel[]> {
+export async function getChannelsByUserId(userId: string): Promise<Channel[]> {
   const res = await authFetch(`${API_URL}/channels/user/${userId}`, {
     method: "GET",
   });

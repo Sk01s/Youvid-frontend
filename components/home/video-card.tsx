@@ -27,7 +27,7 @@ export default function VideoCard({ video }: VideoCardProps) {
   return (
     <Link
       href={`/video/${video.id}`}
-      className={`group cursor-pointer transition-transform duration-300 hover:scale-105  rounded-lg overflow-hidden `}
+      className={` group cursor-pointer transition-transform duration-300 hover:scale-105  rounded-lg overflow-hidden `}
     >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">

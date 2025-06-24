@@ -7,7 +7,7 @@ export async function loginApi(
   password: string,
   username?: string
 ): Promise<{ user: AuthUser; token: string }> {
-  const res = await fetch(`${API_URL}/auth/authenticate`, {
+  const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, username }),
@@ -33,4 +33,15 @@ export async function logoutApi(): Promise<void> {
       message: err.message || "Logout failed",
     } as ApiError;
   }
+}
+export async function authenticate(): Promise<{ id: string }> {
+  const res = await authFetch(`${API_URL}/auth/authenticate`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw {
+      status: res.status,
+      message: err.message || "Logout failed",
+    } as ApiError;
+  }
+  return res.json();
 }
