@@ -31,9 +31,7 @@ export default function VideoViewPage({ video, channel }: VideoViewProps) {
   const { data: subscriptionData } = useQuery({
     queryKey: ["subscription", channelId],
     queryFn: () => getSubscriptionStatus(channelId),
-    initialData: { isSubscribed: false },
   });
-
   // Mutation for liking a video
   const likeMutation = useMutation({
     mutationFn: () => toggleLike(localVideo.id),
@@ -87,7 +85,7 @@ export default function VideoViewPage({ video, channel }: VideoViewProps) {
       );
 
       // Also update the channel subscriber count optimistically
-      const newSubscriberCount = previousStatus?.isSubscribed
+      channel.subscribers = previousStatus?.isSubscribed
         ? channel.subscribers - 1
         : channel.subscribers + 1;
 
