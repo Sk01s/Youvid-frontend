@@ -9,7 +9,7 @@ import { useVideos } from "@/hooks/useVideos";
 
 interface VideoSectionProps {
   title: string;
-  queryKey: string;
+  queryKey: (string | number)[];
   fetcher: () => Promise<any[]>; // or Promise<Video[]>
 }
 

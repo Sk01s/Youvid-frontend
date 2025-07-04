@@ -146,6 +146,28 @@ export async function getUserVideos(page = 1, limit = 20): Promise<Video[]> {
     throw handleApiError(error);
   }
 }
+/**
+ * Get videos for the authenticated user
+ */
+export async function getChannelVideos(
+  channelId = -1,
+  page = 1,
+  limit = 20
+): Promise<Video[]> {
+  try {
+    const url = new URL(`${API_URL}/videos/channel/${channelId}`);
+    url.searchParams.append("page", String(page));
+    url.searchParams.append("limit", String(limit));
+
+    const response = await authFetch(url.toString());
+    const res = await handleResponse<ApiResponse<Video[]>>(response);
+    const data = res.data.map((video) => mapToFrontend(video));
+    return data;
+  } catch (error) {
+    console.log(error);
+    throw handleApiError(error);
+  }
+}
 
 /**
  * Update video interaction (like/save)

@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/features/auth-slice";
 import { selectCurrentUser } from "@/lib/features/auth-slice";
-import { createChannel, getChannelsByUserId } from "@/lib/api/channel.api";
+import { createChannel, getChannelByUserId } from "@/lib/api/channel.api";
 import Modal from "@/components/ui/modal";
 import VideoCard from "@/components/home/video-card";
 
@@ -45,7 +45,7 @@ const DashboardPage = () => {
     queryKey: ["user-channels", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      return getChannelsByUserId(user.id);
+      return getChannelByUserId(user.id);
     },
     enabled: !!user?.id,
   });

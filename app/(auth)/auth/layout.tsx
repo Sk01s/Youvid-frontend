@@ -2,10 +2,14 @@
 import Header from "@/components/home/header";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { authenticate } from "@/lib/api/auth.api";
-import { useSelector } from "react-redux";
-import { selectAuth } from "@/lib/features/auth-slice";
+import { useSelector, useDispatch } from "react-redux";
+import authSlice, {
+  selectAuth,
+  selectAuthVerifying,
+  verifyToken,
+  clearError,
+} from "@/lib/features/auth-slice";
+import type { AppDispatch } from "@/lib/store";
 
 export default function HomeLayout({
   children,
@@ -13,24 +17,34 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const user = useSelector(selectAuth);
-  // Verify token using React Query
-  const { data, isPending } = useQuery({
-    queryKey: ["auth-verify", user.token],
-    queryFn: authenticate,
-    retry: false,
-  });
+  const dispatch = useDispatch<AppDispatch>();
+  const auth = useSelector(selectAuth);
+  const verifying = useSelector(selectAuthVerifying);
+
+  // Verify token on mount
+  useEffect(() => {
+    if (auth.token) {
+      dispatch(verifyToken());
+    } else {
+      // Clear any existing errors if no token
+      dispatch(clearError());
+    }
+  }, [auth.token, dispatch]);
 
   // Redirect if authenticated
   useEffect(() => {
-    if (data?.id) {
+    if (!verifying && auth.user && auth.token) {
       router.back();
     }
-  }, [data, router]);
+  }, [verifying, auth.user, auth.token, router]);
 
-  // Show loader while verifying token
-  if (isPending) {
-    return <div>Loading...</div>;
+  // Show loader while verifying
+  if (verifying || (auth.token && !auth.user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-2xl">Verifying session...</div>
+      </div>
+    );
   }
 
   // Render home layout if not authenticated

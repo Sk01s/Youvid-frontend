@@ -1,4 +1,5 @@
-import { authFetch } from "@/util/store";
+// lib/api/auth.api.ts
+
 import { AuthUser, ApiError } from "../types";
 import { API_URL } from "../utils";
 
@@ -22,9 +23,13 @@ export async function loginApi(
   return res.json();
 }
 
-export async function logoutApi(): Promise<void> {
-  const res = await authFetch(`${API_URL}/auth/logout`, {
+export async function logoutApi(token: string): Promise<void> {
+  const res = await fetch(`${API_URL}/auth/logout`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
   if (!res.ok) {
     const err = await res.json();
@@ -34,14 +39,30 @@ export async function logoutApi(): Promise<void> {
     } as ApiError;
   }
 }
-export async function authenticate(): Promise<{ id: string }> {
-  const res = await authFetch(`${API_URL}/auth/authenticate`);
-  if (!res.ok) {
-    const err = await res.json();
+
+export async function verifyTokenApi(
+  token: string
+): Promise<{ user: AuthUser; token: string }> {
+  const response = await fetch(`${API_URL}/auth/verify`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json();
+
     throw {
-      status: res.status,
-      message: err.message || "Logout failed",
+      status: response.status,
+      message: error.message || "Token verification failed",
     } as ApiError;
   }
-  return res.json();
+  const data = await response.json();
+  if (!data.id) {
+    throw {
+      status: 500,
+      message: "Invalid response format",
+    } as ApiError;
+  }
+  return data;
 }

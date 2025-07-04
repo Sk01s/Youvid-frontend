@@ -41,8 +41,27 @@ export async function getChannelById(id: number): Promise<Channel> {
 /**
  * GET /api/channels/user/:userId
  */
-export async function getChannelsByUserId(userId: string): Promise<Channel[]> {
+export async function getChannelByUserId(userId: string): Promise<Channel[]> {
   const res = await authFetch(`${API_URL}/channels/user/${userId}`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw {
+      status: res.status,
+      message: err.error || err.message || "Failed to fetch user channels",
+    };
+  }
+
+  const data: any[] = await res.json();
+  return data.map(mapChannel);
+}
+/**
+ * GET /api/channels/user/
+ */
+export async function getChannelsForUserId(): Promise<Channel[]> {
+  const res = await authFetch(`${API_URL}/channels/user/`, {
     method: "GET",
   });
 

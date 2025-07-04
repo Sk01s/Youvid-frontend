@@ -1,3 +1,5 @@
+// lib/store.ts
+
 "use client";
 
 import { configureStore } from "@reduxjs/toolkit";
@@ -15,7 +17,7 @@ import {
 } from "redux-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
-// No-op storage for SSR
+// no-op SSR storage
 const createNoopStorage = () => ({
   getItem: (_: string) => Promise.resolve<string | null>(null),
   setItem: (_: string, _v: string) => Promise.resolve(),
@@ -35,6 +37,7 @@ const themePersistConfig = {
 const authPersistConfig = {
   key: "auth",
   storage,
+  blacklist: ["loading", "verifying", "error"],
 };
 
 const rootReducer = {

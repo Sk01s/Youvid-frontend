@@ -7,7 +7,7 @@ import type { RootState } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Home, Video, Clock, Bookmark, ThumbsUp, X } from "lucide-react";
 import { Channel } from "@/lib/types";
-import { getChannelsByUserId } from "@/lib/api/channel.api";
+import { getChannelsForUserId } from "@/lib/api/channel.api";
 
 interface SidebarItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -34,11 +34,12 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     isLoading,
     isError,
   } = useQuery<Channel[], Error>({
-    queryKey: ["channels", userId],
-    queryFn: () => getChannelsByUserId(userId!),
+    queryKey: ["sub-channels"],
+    queryFn: () => getChannelsForUserId(),
     enabled: Boolean(userId),
     staleTime: 1000 * 60 * 5,
   });
+
   return (
     <aside
       className={`w-60 transition-colors duration-300 md:max-h-[calc(100vh-4.3rem)] h-full overflow-y-scroll ${
