@@ -1,7 +1,7 @@
 // pages/history.tsx
 "use client";
 
-import VideoSection from "@/components/home/VideoSection";
+import VideoSection from "@/components/home/video-section";
 import { getChannelVideos } from "@/lib/api/videos/videos.api";
 import { useParams } from "next/navigation";
 
