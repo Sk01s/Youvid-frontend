@@ -1,16 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
+
 import VideoGrid from "@/components/home/video-grid";
-import type { Channel, Video } from "@/lib/types";
 import VideoViewPage from "@/components/video/video-view";
 import { getRecommendedVideos, getVideo } from "@/lib/api/videos/videos.api";
-import { useParams } from "next/navigation";
-import { RootState } from "@/lib/store";
-import { useSelector } from "react-redux";
 import Header from "@/components/home/header";
 import { LoadingPage } from "@/components/ui/loading-page";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import type { Channel, Video } from "@/lib/types";
+import { RootState } from "@/lib/store";
 import { getChannelById } from "@/lib/api/channel.api";
 
 export default function VideoDetail() {
@@ -40,7 +41,7 @@ export default function VideoDetail() {
     error: recError,
   } = useQuery<Video[], Error>({
     queryKey: ["recommended"],
-    queryFn: () => getRecommendedVideos(),
+    queryFn: () => getRecommendedVideos(1, 6).then((value) => value.data),
   });
 
   if (loadingVideo || loadingChannel) return <LoadingPage />;

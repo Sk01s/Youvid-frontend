@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/lib/store";
 import { toggleTheme } from "@/lib/features/theme-slice";
-import { Menu, Sun, Moon, User, Bell, Search, Mic, X } from "lucide-react";
+import { Menu, Sun, Moon, User, Bell, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Header({
   toggleSidebar,
@@ -15,15 +16,15 @@ export default function Header({
   toggleSidebar?: () => void;
 }) {
   const theme = useSelector((state: RootState) => state.theme.mode);
+  const router = useRouter();
   const dispatch = useDispatch();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      setShowMobileSearch(false);
+      // Navigate to search page with query parameter
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

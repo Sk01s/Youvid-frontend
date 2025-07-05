@@ -1,7 +1,7 @@
 // pages/history.tsx
 "use client";
 
-import VideoSection from "@/components/home/VideoSection";
+import VideoSection from "@/components/home/video-section";
 import { getUserViewedVideos } from "@/lib/api/videos/videos.api";
 
 export default function HistoryPage() {

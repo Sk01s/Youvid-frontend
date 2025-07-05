@@ -1,7 +1,7 @@
 // pages/subscriptions.tsx
 "use client";
 
-import VideoSection from "@/components/home/VideoSection";
+import VideoSection from "@/components/home/video-section";
 import { getSubscriptionVideos } from "@/lib/api/videos/videos.api";
 
 export default function SubscriptionsPage() {

@@ -1,5 +1,4 @@
-// api/videos.api.ts
-import { mapToFrontend, mapVideo } from "@/lib/mappers";
+import { mapToFrontend } from "@/lib/mappers";
 import { ApiError, Video, VideoInteraction } from "@/lib/types";
 import { API_URL } from "@/lib/utils";
 import { authFetch } from "@/util/store";
@@ -67,7 +66,7 @@ async function fetchVideos(
 }
 
 /**
- * Get videos with optional filters (returns just the array)
+ * Get videos with optional filters (returns paginated response)
  */
 export async function getVideos(
   page = 1,
@@ -75,11 +74,53 @@ export async function getVideos(
   type?: "recommended" | "trending" | "subscriptions",
   category?: string,
   search?: string
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   try {
     const res = await fetchVideos(page, limit, type, category, search);
-    const data = res.data.map((video) => mapToFrontend(video));
-    return data;
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
+  } catch (error) {
+    throw handleApiError(error);
+  }
+}
+
+/**
+ * Search videos with full-text search capabilities
+ * Returns paginated results with relevance-based ranking
+ */
+export async function searchVideos(
+  searchTerm: string,
+  page = 1,
+  limit = 20
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
+  try {
+    const url = new URL(`${API_URL}/videos`);
+    url.searchParams.append("page", String(page));
+    url.searchParams.append("limit", String(limit));
+    url.searchParams.append("search", searchTerm);
+
+    const response = await authFetch(url.toString());
+    const res = await handleResponse<ApiResponse<Video[]>>(response);
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
   } catch (error) {
     throw handleApiError(error);
   }
@@ -91,7 +132,12 @@ export async function getVideos(
 export async function getRecommendedVideos(
   page = 1,
   limit = 20
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   return getVideos(page, limit, "recommended");
 }
 
@@ -101,7 +147,12 @@ export async function getRecommendedVideos(
 export async function getTrendingVideos(
   page = 1,
   limit = 20
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   return getVideos(page, limit, "trending");
 }
 
@@ -111,7 +162,12 @@ export async function getTrendingVideos(
 export async function getSubscriptionVideos(
   page = 1,
   limit = 20
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   return getVideos(page, limit, "subscriptions");
 }
 
@@ -131,29 +187,33 @@ export async function getVideo(id: number): Promise<Video> {
 /**
  * Get videos for the authenticated user
  */
-export async function getUserVideos(page = 1, limit = 20): Promise<Video[]> {
+export async function getUserVideos(): Promise<Video[]> {
   try {
     const url = new URL(`${API_URL}/videos/user`);
-    url.searchParams.append("page", String(page));
-    url.searchParams.append("limit", String(limit));
 
     const response = await authFetch(url.toString());
-    const res = await handleResponse<Video[]>(response);
-    const data = res.map((video) => mapToFrontend(video));
+    const data = await handleResponse<Video[]>(response);
+
     return data;
   } catch (error) {
     console.log(error);
     throw handleApiError(error);
   }
 }
+
 /**
- * Get videos for the authenticated user
+ * Get videos for a specific channel
  */
 export async function getChannelVideos(
   channelId = -1,
   page = 1,
   limit = 20
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   try {
     const url = new URL(`${API_URL}/videos/channel/${channelId}`);
     url.searchParams.append("page", String(page));
@@ -161,8 +221,13 @@ export async function getChannelVideos(
 
     const response = await authFetch(url.toString());
     const res = await handleResponse<ApiResponse<Video[]>>(response);
-    const data = res.data.map((video) => mapToFrontend(video));
-    return data;
+
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
   } catch (error) {
     console.log(error);
     throw handleApiError(error);
@@ -192,10 +257,18 @@ export async function updateVideoInteraction(
   }
 }
 
+/**
+ * Get user's viewed videos
+ */
 export async function getUserViewedVideos(
   page = 1,
   limit = 20
-): Promise<Video[]> {
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   try {
     const url = new URL(`${API_URL}/videos/user/viewed`);
     url.searchParams.append("page", String(page));
@@ -204,17 +277,29 @@ export async function getUserViewedVideos(
     const response = await authFetch(url.toString());
     const res = await handleResponse<ApiResponse<Video[]>>(response);
 
-    const data = res.data.map((video) => mapToFrontend(video));
-    return data;
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
   } catch (error) {
     throw handleApiError(error);
   }
 }
 
 /**
- * Get user's liked videos with pagination
+ * Get user's liked videos
  */
-export async function getLikedVideos(page = 1, limit = 20): Promise<Video[]> {
+export async function getLikedVideos(
+  page = 1,
+  limit = 20
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   try {
     const url = new URL(`${API_URL}/videos/user/liked`);
     url.searchParams.append("page", String(page));
@@ -223,17 +308,29 @@ export async function getLikedVideos(page = 1, limit = 20): Promise<Video[]> {
     const response = await authFetch(url.toString());
     const res = await handleResponse<ApiResponse<Video[]>>(response);
 
-    const data = res.data.map((video) => mapToFrontend(video));
-    return data;
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
   } catch (error) {
     throw handleApiError(error);
   }
 }
 
 /**
- * Get user's saved videos with pagination
+ * Get user's saved videos
  */
-export async function getSavedVideos(page = 1, limit = 20): Promise<Video[]> {
+export async function getSavedVideos(
+  page = 1,
+  limit = 20
+): Promise<{
+  data: Video[];
+  page: number;
+  total: number;
+  totalPages: number;
+}> {
   try {
     const url = new URL(`${API_URL}/videos/user/saved`);
     url.searchParams.append("page", String(page));
@@ -242,8 +339,12 @@ export async function getSavedVideos(page = 1, limit = 20): Promise<Video[]> {
     const response = await authFetch(url.toString());
     const res = await handleResponse<ApiResponse<Video[]>>(response);
 
-    const data = res.data.map((video) => mapToFrontend(video));
-    return data;
+    return {
+      data: res.data.map((video) => mapToFrontend(video)),
+      page: res.page,
+      total: res.total,
+      totalPages: res.totalPages,
+    };
   } catch (error) {
     throw handleApiError(error);
   }
