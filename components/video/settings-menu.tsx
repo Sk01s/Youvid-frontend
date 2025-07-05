@@ -1,5 +1,5 @@
 import React from "react";
-import { QualityLevel } from "@/hooks/useVideoPlayer";
+import { QualityLevel } from "@/hooks/player/use-video-player";
 
 interface SettingsMenuProps {
   showSettings: boolean;

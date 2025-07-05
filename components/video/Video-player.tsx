@@ -1,14 +1,15 @@
-import React from "react";
-import useVideoPlayer, { QualityLevel } from "@/hooks/useVideoPlayer";
-import PlayButton from "./play-button";
+"use client";
+import React, { useState } from "react";
+import useVideoPlayer from "@/hooks/player/use-video-player";
 import LoadingOverlay from "./loading-overlay";
 import ThumbnailOverlay from "./thumbnail-overlay";
 import SeekPreview from "./seek-preview";
-import KeyboardHint from "./keyboard-hint";
 import ControlsOverlay from "./controls-overlay";
 import ProgressBar from "./progress-bar";
 import ControlButtons from "./control-buttons";
 import SettingsMenu from "./settings-menu";
+import CenterPlayButton from "./center-play-button";
+import { Play, Pause } from "lucide-react";
 
 interface VideoPlayerProps {
   hlsUrl: string;
@@ -60,6 +61,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, thumbnailUrl }) => {
     openQualityMenu,
   } = actions;
 
+  // Track if mouse is over play button specifically
+  const [isOverPlayButton, setIsOverPlayButton] = useState(false);
+
   return (
     <div
       ref={playerRef}
@@ -95,13 +99,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, thumbnailUrl }) => {
           visible={!playing && videoLoaded}
           thumbnailUrl={thumbnailUrl}
         />
-        <PlayButton visible={!playing && videoLoaded} onClick={togglePlay} />
+
+        {/* Play/Pause button in center */}
+
+        <CenterPlayButton
+          playing={playing}
+          showControls={showControls}
+          togglePlay={togglePlay}
+        />
+
         <SeekPreview
           visible={seekPreviewVisible}
           time={seekPreviewTime}
           formatTime={formatTime}
         />
-        <KeyboardHint visible={!playing && videoLoaded} />
       </div>
 
       <ControlsOverlay
