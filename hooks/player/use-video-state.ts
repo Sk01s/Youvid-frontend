@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { QualityLevel } from "@/hooks/player/use-video-player";
 
 export interface VideoPlayerState {
@@ -48,15 +48,22 @@ export const initialState: VideoPlayerState = {
 export default function useVideoState(initial = initialState) {
   const [state, setState] = useState<VideoPlayerState>(initial);
 
+  // Stabilize updateState with useCallback
+  const updateState = useCallback((update: Partial<VideoPlayerState>) => {
+    setState((prev) => ({ ...prev, ...update }));
+  }, []); // Empty dependency array makes this stable
+
+  // Stabilize formatTime
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  }, []);
+
   return {
     state,
     setState,
-    updateState: (update: Partial<VideoPlayerState>) =>
-      setState((prev) => ({ ...prev, ...update })),
-    formatTime: (seconds: number) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-    },
+    updateState,
+    formatTime,
   };
 }
